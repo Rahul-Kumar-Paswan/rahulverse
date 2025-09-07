@@ -1,3 +1,4 @@
+---
 alertmanager:
   enabled: false
 
@@ -8,7 +9,7 @@ prometheus:
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: ebs-sc   # ✅ make sure this matches your cluster
+          storageClassName: ebs-sc   # ? make sure this matches your cluster
           accessModes:
             - ReadWriteOnce
           resources:
@@ -27,12 +28,12 @@ grafana:
 nodeExporter:
   enabled: true
   service:
-    type: ClusterIP  # ✅ node-exporter usually runs as DaemonSet, not LB
+    type: ClusterIP  # ? node-exporter usually runs as DaemonSet, not LB
 
 kubeStateMetrics:
   enabled: true
   service:
-    type: ClusterIP  # ✅ same here, don’t expose directly outside
+    type: ClusterIP  # ? same here, dont expose directly outside
 
 additionalScrapeConfigs:
       - job_name: node-exporter
