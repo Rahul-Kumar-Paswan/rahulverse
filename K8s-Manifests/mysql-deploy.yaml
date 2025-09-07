@@ -14,33 +14,26 @@ spec:
         app: mysql
     spec:
       containers:
-      - name: mysql
-        image: mysql:8.1
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: MYSQL_PASSWORD
-        - name: MYSQL_DATABASE
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: DB_NAME
-        - name: MYSQL_USER
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: DB_USER
-        ports:
-        - containerPort: 3306
-        volumeMounts:
-        - mountPath: /var/lib/mysql
-          name: mysql-storage
+        - name: mysql
+          image: mysql:8.1
+          envFrom:
+            - secretRef:
+                name: mysql-secret
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+            - name: mysql-initdb
+              mountPath: /docker-entrypoint-initdb.d
       volumes:
-      - name: mysql-storage
-        persistentVolumeClaim:
-          claimName: mysql-pvc
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+        - name: mysql-initdb
+          configMap:
+            name: mysql-initdb-config
+
 ---
 apiVersion: v1
 kind: Service
@@ -49,10 +42,11 @@ metadata:
   namespace: rahulverse-prod
 spec:
   ports:
-  - port: 3306
+    - port: 3306
   selector:
     app: mysql
   clusterIP: None
+  
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
